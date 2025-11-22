@@ -2,8 +2,13 @@
 
 namespace App\Http\Resources;
 
-class PropertyResource
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class PropertyResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     */
     public function toArray($request): array
     {
         return [
@@ -14,7 +19,7 @@ class PropertyResource
             "location" => $this->location,
             "amenities" => $this->amenities,
             "images" => $this->images,
-            "availabilities" => $this->availabilities,
+            "availabilities" => $this->whenLoaded('availabilities'),
         ];
     }
 }

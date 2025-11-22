@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\PropertyResource;
 use App\Models\Property;
 use App\QueryFilters\PropertyFilter;
 
@@ -11,7 +12,9 @@ class PropertyService
     {
         return Property::filter(new PropertyFilter($filters))
             ->with('availabilities')
-            ->paginate($filters['per_page'] ?? 15);
+            ->latest()
+            ->paginate($filters['per_page'] ?? 15)
+            ->through(fn ($item) => new PropertyResource($item));
     }
 
     public function create(array $data): Property

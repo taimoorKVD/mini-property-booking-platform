@@ -1,5 +1,4 @@
 <?php
-
 namespace Database\Factories;
 
 use Exception;
@@ -12,6 +11,11 @@ class PropertyFactory extends Factory
      */
     public function definition(): array
     {
+        // Helper function to generate dynamic placeholder URLs
+        $generatePlaceholderUrl = function($width, $height, $text, $bgColor = 'cccccc', $textColor = '000000') {
+            return "https://placehold.co/{$width}x{$height}/{$bgColor}/{$textColor}?text=" . urlencode($text);
+        };
+
         return [
             "title" => $this->faker->sentence(3),
             "description" => $this->faker->paragraph(),
@@ -22,9 +26,10 @@ class PropertyFactory extends Factory
                 random_int(2, 5)
             ),
             "images" => [
-                $this->faker->imageUrl(640, 480, "house", true),
-                $this->faker->imageUrl(640, 480, "interior", true)
+                $generatePlaceholderUrl(640, 480, 'house', '00ffaa', 'ffffff'), // house image
+                $generatePlaceholderUrl(640, 480, 'interior', '004411', 'ffffff'), // interior image
             ]
         ];
     }
 }
+

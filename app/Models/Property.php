@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\QueryFilters\PropertyFilter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class Property extends Model
 {
@@ -18,6 +20,11 @@ class Property extends Model
         'amenities' => 'array',
         'images' => 'array'
     ];
+
+    public function scopeFilter(Builder $query, PropertyFilter $filter): Builder
+    {
+        return $filter->apply($query);
+    }
 
     public function availabilities(): HasMany
     {

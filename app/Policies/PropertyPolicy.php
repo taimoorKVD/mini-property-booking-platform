@@ -7,23 +7,28 @@ use App\Models\User;
 
 class PropertyPolicy
 {
-    public function before(User $user, $ability): bool
+    public function viewAny(User $user): bool
     {
-        return $user->role === 'admin';
+        return true;
+    }
+
+    public function view(User $user): bool
+    {
+        return true;
     }
 
     public function create(User $user): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     public function update(User $user, Property $property): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     public function delete(User $user, Property $property): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 }

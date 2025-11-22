@@ -3,21 +3,29 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Models\Booking;
+use App\Services\BookingService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookingController extends Controller
 {
-    /**
-     * @throws AuthorizationException
-     */
-    public function index()
+    public function index(Request $request): LengthAwarePaginator
     {
-        $this->authorize('adminOnly');
-        return Booking::with(['property', 'user'])->get();
+        $user = auth()->user();
+
+        $query = Booking::with(['property', 'user'])
+            ->latest();
+
+        if ($user->role === 'guest') {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query->paginate($request->integer('per_page') ?: 15);
     }
 
-    public function store(Request $req): JsonResponse
+    public function store(Request $req)
     {
         $req->validate([
             "property_id" => "required",
@@ -25,10 +33,12 @@ class BookingController extends Controller
             "end_date" => "required|date",
         ]);
 
+        $property_id = $req->get('property_id');
+        $start_date = $req->get('start_date');
+        $end_date = $req->get('end_date');
+
         $service = new BookingService();
-        $ok = $service->checkAvailability(
-            $req->property_id, $req->start_date, $req->end_date
-        );
+        $ok = $service->checkAvailability($property_id, $start_date, $end_date);
 
         if (!$ok) {
             return response()->json(["message" => "Not available"], 422);
@@ -36,21 +46,15 @@ class BookingController extends Controller
 
         return Booking::create([
             "user_id" => auth()->id(),
-            "property_id" => $req->property_id,
-            "start_date" => $req->start_date,
-            "end_date" => $req->end_date,
+            "property_id" => $property_id,
+            "start_date" => $start_date,
+            "end_date" => $end_date,
         ]);
     }
 
-    /**
-     * @throws AuthorizationException
-     */
-    public function updateStatus(Request $req, $id)
+    public function updateStatus(Request $req, Booking $booking): Booking
     {
-        $this->authorize('adminOnly');
-
-        $booking = Booking::findOrFail($id);
-        $booking->update(["status" => $req->status]);
+        $booking->update(["status" => $req->get('status')]);
         return $booking;
     }
 }

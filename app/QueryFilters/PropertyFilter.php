@@ -35,4 +35,25 @@ class PropertyFilter
     {
         $query->where('price_per_night', '<=', $max);
     }
+
+    public function filterStart_date($query, $startDate): void
+    {
+        $endDate = $this->filters['end_date'] ?? null;
+
+        if (empty($endDate)) {
+            return;
+        }
+
+        $query->whereHas('availabilities', function ($q) use ($startDate, $endDate) {
+            $q->where('start_date', '<=', $startDate)
+                ->where('end_date', '>=', $endDate);
+        });
+
+        $query->whereDoesntHave('bookings', function ($q) use ($startDate, $endDate) {
+            $q->where(function ($q) use ($startDate, $endDate) {
+                $q->where('start_date', '<', $endDate)
+                    ->where('end_date', '>', $startDate);
+            });
+        });
+    }
 }

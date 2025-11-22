@@ -21,13 +21,15 @@ class PropertyController extends Controller
     {
         $this->service = $service;
 
-        $this->authorizeResource(Property::class, 'property');
+        $this->authorizeResource(Property::class, 'property', [
+            'except' => ['index'],
+        ]);
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         try {
-            return $this->service->getFiltered($request->all())->through(fn($item) => new PropertyResource($item));
+            return $this->service->getFiltered($request->all());
         } catch (Throwable $e) {
             return ApiResponse::error('Failed to fetch properties', 500);
         }

@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Availability;
+use App\Models\Booking;
+
 class BookingService
 {
     public function checkAvailability($propertyId, $start, $end): bool
